@@ -1,3 +1,7 @@
+# Spring Cloud Stream + Kafka - Demo
+
+---
+
 # Overview
 This sample project demonstrates how to build [real-time streaming](https://aws.amazon.com/streaming-data/) applications using [event-driven architecture](https://thenewstack.io/event-driven-architecture-wave-future/),
  [Spring Boot](https://thenewstack.io/event-driven-architecture-wave-future/),
@@ -5,26 +9,41 @@ This sample project demonstrates how to build [real-time streaming](https://aws.
  [Apache Kafka](https://kafka.apache.org/) and
  [Lombok](https://projectlombok.org/).
 
++++
+
 By end of this tutorial you'll have a simple Spring Boot based Greetings microservice running that
 1. takes a message from a REST api
 2. writes it to a Kafka topic
 3. reads it from the topic
 4. outputs it to the console
 
++++
+
 Let's get started!
+
+---
 
 # What is Spring Cloud Streaming
 Spring Cloud Stream is a framework for building message-driven microservices and it's built upon Spring Boot.
 
+---
+
 # What is Kafka
 Kafka is a popular high performant and horizontally scalable messaging platform originally developed by LinkedIn and later on donated to the Apache Foundation.
 
+---
+
 # Installing Kafka
+
++++
+
 1. Download Kafka from [here](https://kafka.apache.org/downloads) and untar it:
 ```
 > tar -xzf kafka_2.11-1.0.0.tgz
 > cd kafka_2.11-1.0.0
 ```
+
++++
 
 2. Start Zookeeper and Kafka
 
@@ -40,24 +59,37 @@ On Linux or Mac:
 > bin/kafka-server-start.sh config/server.properties
 ```
 
++++
+
 If Kafka is not running and fails to start after your computer wakes up from hibernation, delete the ```<TMP_DIR>/kafka-logs``` folder and then start Kafka again.
+
+---
 
 # What is Lombok
 Lombok is a java framework that automatically generates getters, setters, toString(), builders, Loggers, etc. in the code.
 
+---
+
 # Maven dependencies
-1. Go to https://start.spring.io to create a maven project with the necessary dependencies:
+
++++
+
+Go to https://start.spring.io to create a maven project
+![Spring Initializer](spring-initializr-streamkafka.png)
+
++++
+
+1. Add necessary dependencies:
 - Spring Cloud Stream
 - Kafka
 - Devtools (for hot redeploys during development, optional)
 - Actuator (for monitoring application, optional)
 - Lombok (make sure to also have the Lombok plugin installed in your IDE)
-
-See below screenshot: ![Spring Initializer](spring-initializr-streamkafka.png)
-
 2. Click the Generate Project button to download the project as a zip file
 3. Extract zip file and import the maven project to your favourite IDE
 4. Notice the maven dependencies in the ```pom.xml``` file:
+
++++
 
 ```
   <dependency>
@@ -88,6 +120,8 @@ See below screenshot: ![Spring Initializer](spring-initializr-streamkafka.png)
   </dependency>
 ```
 
++++
+
 ... also the ```<dependencyManagement>``` section:
 ```
     <dependencyManagement>
@@ -111,6 +145,8 @@ See below screenshot: ![Spring Initializer](spring-initializr-streamkafka.png)
     </dependencyManagement>
 ```
 
++++
+
 ... and the ```<repository>``` section:
 ```
     <repository>
@@ -122,8 +158,11 @@ See below screenshot: ![Spring Initializer](spring-initializr-streamkafka.png)
         </snapshots>
     </repository>
 ```
+
+---
+
 # Define the Kafka streams
-In order for our application to be able to communicate with Kafka, we'll need to define an outbound stream to write messages to a Kafka topic, and an inbound stream to read messages from a Kafka topic. Spring Cloud provides a convenient way to do this by simply creating an interface that defines a separate method for each stream. See below code that I placed in the ```com.kaviddiss.streamkafka.stream.GreetingsStreams``` class (you don't need to declare constants for the stream names):
+See below code in the ```com.kaviddiss.streamkafka.stream.GreetingsStreams``` class (you don't need to declare constants for the stream names):
 
 ```
 package com.kaviddiss.streamkafka.stream;
@@ -145,11 +184,19 @@ public interface GreetingsStreams {
 }
 ```
 
+Note:
+In order for our application to be able to communicate with Kafka, we'll need to define an outbound stream to write messages to a Kafka topic, and an inbound stream to read messages from a Kafka topic. Spring Cloud provides a convenient way to do this by simply creating an interface that defines a separate method for each stream.
+
+Note:
 The ```inboundGreetings()``` method defines the inbound stream to read from Kafka and ```outboundGreetings()``` method defines the outbound stream to write to Kafka.
 
+Note:
 During runtime Spring will create a java proxy based implentation of the ```GreetingsStreams``` interface that can be injected as a Spring Bean anywhere in the code to access our two streams. 
 
+---
+
 # Configure Spring Cloud Stream
+Note:
 Our next step is to configure Spring Cloud Stream to bind to our streams in the ```GreetingsStreams``` interface. This can be done by creating a ```@Configuration``` class ```com.kaviddiss.streamkafka.config.StreamsConfig``` with below code:
 
 ```
@@ -163,12 +210,18 @@ public class StreamsConfig {
 }
 ```
 
+Note:
 Binding the streams is done using the ```@EnableBinding``` annotation where the ```GreatingsService``` interface is passed to.
 
+---
+
 # Configuration properties for Kafka
+Note:
 By default, the configuration properties are stored in the ```src/main/resources/application.properties``` file, however I prefer to use the YAML format as it's less verbose and allows to keep both common and environment-specific properties in the same file.
 
+Note:
 For now, let's rename ```application.properties``` to ```application.yaml``` and paste below config snippet into the file:
+
 ```
 spring:
   cloud:
@@ -185,11 +238,16 @@ spring:
           contentType: application/json
 ```          
 
+Note:
 The above configuration properties configure the address of the Kafka server to connect to, and the Kafka topic we use for both the inbound and outbound streams in our code. They both must use the same Kafka topic!
 
+Note:
 The ```contentType``` properties tell Spring Cloud Stream to send/receive our message objects as ```String```s in the streams.
 
+---
+
 # Create the message object
+Note:
 Create a simple ```com.kaviddiss.streamkafka.model.Greetings``` class with below code that will represent the message object we read from and write to the ```greetings``` Kafka topic:
 
 ```
@@ -208,9 +266,13 @@ public class Greetings {
 }
 ```
 
+Note:
 Notice how the class doesn't have any getters and setters thanks to the Lombok annotations. The ```@ToString``` will generate a ```toString()``` method using the class' fields and the ```@Builder``` annotation will allow us creating ```Greetings``` objects using fluent builder (see below).
 
+---
+
 # Create service layer to write to Kafka
+Note:
 Let's create the ```com.kaviddiss.streamkafka.service.GreetingsService``` class with below code that will write a ```Greetings``` object to the ```greetings``` Kafka topic:
 
 ```
@@ -246,13 +308,19 @@ public class GreetingsService {
 }
 ```
 
+Note:
 The ```@Service``` annotation will configure this class a Spring Bean and inject the ```GreetingsService``` dependency via the constructor.
 
+Note:
 The ```@Slf4j``` annotation will generate an SLF4J logger field that we can use for logging.
 
+Note:
 In the ```sendGreeting()``` method we use the injected ```GreetingsStream``` object to send a message represented by the ```Greetings``` object.
 
+---
+
 # Create REST api
+Note:
 Now we'll be creating a REST api endpoint that will trigger sending a message to Kafka using the ```GreetingsService``` Spring Bean:
 
 ```
@@ -287,9 +355,13 @@ public class GreetingsController {
 }
 ```
 
+Note:
 The ```@RestController``` annotation tells Spring that this is a Controller bean (the C from MVC). The ```greetings()``` method defines an ```HTTP GET /greetings``` endpoint that takes a ```message``` request param and passes it to the ```sendGreeting()``` method in ```GreetingsService```.
 
-# Listen on the greetings Kafka topic
+---
+
+# Listening on the greetings Kafka topic
+Note:
 Let's create a ```com.kaviddiss.streamkafka.service.GreetingsListener``` class that will listen to messages on the ```greetings``` Kafka topic and log them on the console:
 
 ```
@@ -312,12 +384,18 @@ public class GreetingsListener {
 }
 ```
 
+Note:
 The ```@Component``` annotation similarly to ```@Service``` and ```@RestController``` defines a Spring Bean.
 
+Note:
 ```GreetingsListener``` has a single method, ```handleGreetings()``` that will be invoked by Spring Cloud Stream with every new ```Greetings``` message object on the ```greetings``` Kafka topic. This is thanks to the ```@StreamListener``` annotation configured for the ```handleGreetings()``` method.
+
+---
 
 # Running the application
 The last piece of the puzzle is the ```com.kaviddiss.streamkafka.StreamKafkaApplication``` class that was auto-generated by the Spring Initializer:
+
++++
 
 ```
 package com.kaviddiss.streamkafka;
@@ -334,13 +412,19 @@ public class StreamKafkaApplication {
 }
 ```
 
++++
+
 No need to make any changes here. You can either run this class as a Java application from your IDE, or run the application from the command line using the Spring Boot maven plugin:
 
 ```
 > mvn spring-boot:run
 ```
 
++++
+
 Once the application is running, go to http://localhost:8080/greetings?message=hello in the browser and check your console.
 
-# Conclusion
+---
+
+# Summary
 I hope you enjoyed this tutorial. Feel free to ask any questions and leave your feedback.
