@@ -17,7 +17,7 @@ By end of this tutorial you'll have a simple Spring Boot based Greetings microse
 3. reads it from the topic
 4. outputs it to the console
 
-+++
+---
 
 ### Let's get started!
 
@@ -74,12 +74,12 @@ Lombok is a java framework that automatically generates getters, setters, toStri
 
 +++
 
-Go to https://start.spring.io to create a maven project
+Go to https://start.spring.io to create a maven project:
 ![Spring Initializer](spring-initializr-streamkafka.png)
 
 +++
 
-1. Add necessary dependencies: Spring Cloud Stream, Kafka, Devtools (for hot redeploys during development, optional), Actuator (for monitoring application, optional), Lombok (make sure to also have the Lombok plugin installed in your IDE)
+1. Add necessary dependencies: ```Spring Cloud Stream```, ```Kafka```, ```Devtools``` (for hot redeploys during development, optional), ```Actuator``` (for monitoring application, optional), ```Lombok``` (make sure to also have the Lombok plugin installed in your IDE)
 2. Click the Generate Project button to download the project as a zip file
 3. Extract zip file and import the maven project to your favourite IDE
 
@@ -196,6 +196,8 @@ public interface GreetingsStreams {
 
 In order for our application to be able to communicate with Kafka, we'll need to define an outbound stream to write messages to a Kafka topic, and an inbound stream to read messages from a Kafka topic.
 
++++
+
 Spring Cloud provides a convenient way to do this by simply creating an interface that defines a separate method for each stream.
 
 +++
@@ -204,12 +206,16 @@ The ```inboundGreetings()``` method defines the inbound stream to read from Kafk
 
 +++
 
-During runtime Spring will create a java proxy based implentation of the ```GreetingsStreams``` interface that can be injected as a Spring Bean anywhere in the code to access our two streams. 
+During runtime Spring will create a java proxy based implementation of the ```GreetingsStreams``` interface that can be injected as a Spring Bean anywhere in the code to access our two streams. 
 
 ---
 
 ### Configure Spring Cloud Stream
-Our next step is to configure Spring Cloud Stream to bind to our streams in the ```GreetingsStreams``` interface. This can be done by creating a ```@Configuration``` class ```com.kaviddiss.streamkafka.config.StreamsConfig``` with below code:
+Our next step is to configure Spring Cloud Stream to bind to our streams in the ```GreetingsStreams``` interface. 
+
++++
+
+This can be done by creating a ```@Configuration``` class ```com.kaviddiss.streamkafka.config.StreamsConfig``` with below code:
 
 +++
 
@@ -232,7 +238,11 @@ Binding the streams is done using the ```@EnableBinding``` annotation where the 
 
 ### Configuration properties for Kafka
 
-By default, the configuration properties are stored in the ```src/main/resources/application.properties``` file, however I prefer to use the YAML format as it's less verbose and allows to keep both common and environment-specific properties in the same file.
+By default, the configuration properties are stored in the ```src/main/resources/application.properties``` file.
+
++++
+
+However I prefer to use the YAML format as it's less verbose and allows to keep both common and environment-specific properties in the same file.
 
 +++
 
@@ -324,7 +334,11 @@ public class GreetingsService {
     public GreetingsService(GreetingsStreams greetingsStreams) {
         this.greetingsStreams = greetingsStreams;
     }
+```
 
++++
+
+```
     public void sendGreeting(final Greetings greetings) {
         log.info("Sending greetings {}", greetings);
 
@@ -339,7 +353,7 @@ public class GreetingsService {
 
 +++
 
-The ```@Service``` annotation will configure this class a Spring Bean and inject the ```GreetingsService``` dependency via the constructor.
+The ```@Service``` annotation will configure this class as a Spring Bean and inject the ```GreetingsService``` dependency via the constructor.
 
 +++
 
@@ -379,7 +393,11 @@ public class GreetingsController {
     public GreetingsController(GreetingsService greetingsService) {
         this.greetingsService = greetingsService;
     }
+```
 
++++
+
+```
     @GetMapping("/greetings")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void greetings(@RequestParam("message") String message) {
