@@ -37,7 +37,7 @@ Kafka is a popular high performant and horizontally scalable messaging platform 
 
 +++
 
-1. Download Kafka from [here](https://kafka.apache.org/downloads) and untar it:
+Download Kafka from [here](https://kafka.apache.org/downloads) and untar it:
 ```
 > tar -xzf kafka_2.11-1.0.0.tgz
 > cd kafka_2.11-1.0.0
@@ -45,7 +45,7 @@ Kafka is a popular high performant and horizontally scalable messaging platform 
 
 +++
 
-2. Start Zookeeper and Kafka
+Start Zookeeper and Kafka
 
 On Windows:
 ```
@@ -79,12 +79,7 @@ Go to https://start.spring.io to create a maven project
 
 +++
 
-1. Add necessary dependencies:
-- Spring Cloud Stream
-- Kafka
-- Devtools (for hot redeploys during development, optional)
-- Actuator (for monitoring application, optional)
-- Lombok (make sure to also have the Lombok plugin installed in your IDE)
+1. Add necessary dependencies: Spring Cloud Stream, Kafka, Devtools (for hot redeploys during development, optional), Actuator (for monitoring application, optional), Lombok (make sure to also have the Lombok plugin installed in your IDE)
 2. Click the Generate Project button to download the project as a zip file
 3. Extract zip file and import the maven project to your favourite IDE
 4. Notice the maven dependencies in the ```pom.xml``` file:
@@ -104,7 +99,11 @@ Go to https://start.spring.io to create a maven project
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-starter-stream-kafka</artifactId>
   </dependency>
+```
 
++++
+
+```
   <!-- Also install the Lombok plugin in your IDE -->
   <dependency>
       <groupId>org.projectlombok</groupId>
