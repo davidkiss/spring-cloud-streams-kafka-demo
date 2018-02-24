@@ -1,4 +1,4 @@
-# Spring Cloud Stream + Kafka - Demo
+# Spring Cloud Stream with Kafka
 
 ---
 
