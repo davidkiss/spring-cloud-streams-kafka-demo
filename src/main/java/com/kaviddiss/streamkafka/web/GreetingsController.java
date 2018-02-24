@@ -18,8 +18,11 @@ public class GreetingsController {
 
     @GetMapping("/greetings")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void hello(@RequestParam("message") String message) {
-        Greetings greetings = Greetings.builder().message(message).timestamp(System.currentTimeMillis()).build();
+    public void greetings(@RequestParam("message") String message) {
+        Greetings greetings = Greetings.builder()
+            .message(message)
+            .timestamp(System.currentTimeMillis())
+            .build();
 
         greetingsService.sendGreeting(greetings);
     }
