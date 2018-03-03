@@ -1,4 +1,5 @@
 # Spring Cloud Stream with Kafka
+by David Kiss (http://kaviddiss.com/2018/03/03/spring-cloud-stream-kafka/)
 
 ---
 
